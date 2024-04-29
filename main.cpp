@@ -1,0 +1,64 @@
+#include <iostream>
+
+#include "MainWindow/MainWindow.h"
+#include "CreateWindow/CreateWindow.h"
+
+
+const int width = 800;
+const int height = 600; 
+
+const int MainWindowId = 0;
+const int CreateWindowId = 1;
+
+GtkWidget *window;
+
+template<typename T>
+void show_window();
+void loop(ID);
+void get_response(ID);
+
+
+int main(int argc, char *argv[]) {
+    gtk_init(&argc, &argv);
+
+    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_default_size(GTK_WINDOW(window), width, height);
+    g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+
+    loop(0);
+
+    // Запуск главного цикла GTK
+    gtk_main();
+
+
+    return 0;
+}
+
+template<typename T>
+void show_window(){
+    static T w(window, width, height);
+    w.show();
+    w.response_changed.connect(sigc::ptr_fun(&get_response));
+}
+
+void loop(ID process){
+    switch (process) {
+    
+    case MainWindowId:
+        show_window<MainWindow>();
+        return;
+
+    case CreateWindowId:
+        show_window<CreateWindow>();        
+        return;
+
+    default:
+        return;
+    
+    }
+}
+
+void get_response(ID response){
+    std::cout << response << std::endl;
+    loop(response);
+}
