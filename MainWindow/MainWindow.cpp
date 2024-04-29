@@ -45,10 +45,6 @@ void MainWindow::show() {
     gtk_widget_show_all(window);
 }
 
-void MainWindow::send_response(ID new_id) {
-    set_response(new_id);
-}
-
 void clear_window(gpointer data, ID id) {
     MainWindow *main_window = static_cast<MainWindow *>(data);
     GtkWidget *window = main_window->get_window();

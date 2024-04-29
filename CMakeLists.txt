@@ -10,6 +10,7 @@ set(${project}_SOURCES
 
 add_subdirectory(MainWindow)  
 add_subdirectory(CreateWindow)   
+add_subdirectory(CreateTools)  
 
 set(${project}_SOURCE_LIST
         ${${project}_SOURCES})

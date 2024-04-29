@@ -25,6 +25,22 @@ int main(int argc, char *argv[]) {
     gtk_window_set_default_size(GTK_WINDOW(window), width, height);
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
+    // Фон окна
+    GtkCssProvider *provider = gtk_css_provider_new();
+    GError *error = nullptr;
+    gtk_css_provider_load_from_path(provider, "../styles/window.css", &error);
+    if (error != nullptr) {
+        g_printerr("Ошибка загрузки CSS: %s\n", error->message);
+        g_error_free(error);
+        return 0;
+    }
+
+    GtkStyleContext *context = gtk_widget_get_style_context(window);
+    gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+
+    g_object_unref(provider);
+
+    // Мой цикл
     loop(0);
 
     // Запуск главного цикла GTK

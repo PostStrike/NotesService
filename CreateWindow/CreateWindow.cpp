@@ -1,5 +1,7 @@
 #include "CreateWindow.h"
 
+#include "Grid.h"
+
 
 CreateWindow::CreateWindow(GtkWidget *window, const int width, const int height){
     this->width = width;
@@ -9,5 +11,12 @@ CreateWindow::CreateWindow(GtkWidget *window, const int width, const int height)
 }
 
 void CreateWindow::show() {
+    GtkWidget *drawing_area = gtk_drawing_area_new();
+    gtk_container_add(GTK_CONTAINER(window), drawing_area);
+
+    //отрисовка сетки
+    Grid grid(width, height);
+    g_signal_connect(drawing_area, "draw", G_CALLBACK(on_draw), &grid);
+
     gtk_widget_show_all(window);
 }

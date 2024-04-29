@@ -11,7 +11,6 @@ public:
     MainWindow(GtkWidget *, const int, const int);
     void show();
     void create_buttons();
-    void send_response(ID);
 
     sigc::signal<void, int> response_changed;
 
@@ -19,8 +18,8 @@ public:
         return window;
     } 
 
-    void set_response(ID new_id) {
-        response_changed.emit(new_id);
+    void send_response(ID id) {
+        response_changed.emit(id);
     }
 private:
     int width;
