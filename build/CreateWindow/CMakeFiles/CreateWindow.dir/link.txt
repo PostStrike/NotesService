@@ -1,2 +1,0 @@
-/usr/bin/ar qc libCreateWindow.a CMakeFiles/CreateWindow.dir/CreateWindow.cpp.o
-/usr/bin/ranlib libCreateWindow.a

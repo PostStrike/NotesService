@@ -1,9 +1,0 @@
-/home/ivan/prog/Notes-Service/build/CMakeFiles/notes.dir
-/home/ivan/prog/Notes-Service/build/CMakeFiles/edit_cache.dir
-/home/ivan/prog/Notes-Service/build/CMakeFiles/rebuild_cache.dir
-/home/ivan/prog/Notes-Service/build/MainWindow/CMakeFiles/MainWindow.dir
-/home/ivan/prog/Notes-Service/build/MainWindow/CMakeFiles/edit_cache.dir
-/home/ivan/prog/Notes-Service/build/MainWindow/CMakeFiles/rebuild_cache.dir
-/home/ivan/prog/Notes-Service/build/CreateWindow/CMakeFiles/CreateWindow.dir
-/home/ivan/prog/Notes-Service/build/CreateWindow/CMakeFiles/edit_cache.dir
-/home/ivan/prog/Notes-Service/build/CreateWindow/CMakeFiles/rebuild_cache.dir
