@@ -15,8 +15,8 @@ void CreateWindow::show() {
     gtk_container_add(GTK_CONTAINER(window), drawing_area);
 
     //отрисовка сетки
-    Grid grid(width, height);
-    g_signal_connect(drawing_area, "draw", G_CALLBACK(on_draw), &grid);
+    Grid* grid = new Grid(width, height, 20);
+    g_signal_connect(drawing_area, "draw", G_CALLBACK(on_draw), grid);
 
     gtk_widget_show_all(window);
 }

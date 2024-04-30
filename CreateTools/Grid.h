@@ -1,4 +1,7 @@
 #include <vector>
+#include <string>
+#include <iostream>
+
 #include <gtk/gtk.h>
 
 #ifndef CREATETOOLS_H
@@ -6,18 +9,19 @@
 
 class Grid {
 public:
-    Grid(const int, const int);
+    Grid(const int, const int, const int);
 
-    void draw(cairo_t *);
+    void draw(cairo_t *, char);
+    void draw_cursor(cairo_t *);
 private:
+    //переменные для области отрисовки
     int width;
     int height;
     
-    int cell_width = 20;
-    int cell_height = 30;
+    //переменные для элементов сетки
+    int font_size;
     int num_rows;
     int num_cols;
-    int padding;
 
     std::vector<std::vector<char>> grid;
 
@@ -27,7 +31,7 @@ private:
 //functions
 inline gboolean on_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
     Grid *grid = static_cast<Grid*>(data);
-    grid->draw(cr);
+    grid->draw_cursor(cr);
     return FALSE;
 }
 
