@@ -33,9 +33,24 @@ void Grid::draw_cursor(cairo_t *cr) {
                                                           + "/cursor_text.png";
     cairo_surface_t *cursor_surface = cairo_image_surface_create_from_png(file_path.c_str());
 
+    cairo_save(cr);
+
     cairo_set_source_surface(cr, cursor_surface, 0, 0);
     cairo_paint(cr);
 
     // Очищение памяти
     cairo_surface_destroy(cursor_surface);
+    
+    cairo_restore(cr); 
+}
+
+void Grid::delete_cursor(cairo_t *cr) {
+    cairo_save(cr);
+
+    cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
+    cairo_rectangle(cr, 0, 0, 
+                    FontRectangles[font_size].first, FontRectangles[font_size].second);
+    cairo_fill(cr);
+
+    cairo_restore(cr); 
 }
