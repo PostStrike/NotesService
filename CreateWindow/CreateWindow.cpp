@@ -1,8 +1,5 @@
 #include "CreateWindow.h"
 
-#include "Grid.h"
-
-
 CreateWindow::CreateWindow(GtkWidget *window, const int width, const int height){
     this->width = width;
     this->height = height;
@@ -30,9 +27,8 @@ void draw_loop(GtkWidget* window, Grid *grid) {
 }
 
 void CreateWindow::show() {
-
     //отрисовка сетки
-    Grid* grid = new Grid(width, height, 30);
+    grid = new Grid(width, height, 30);
     std::thread* draw_thread = new std::thread(draw_loop, window, grid);
     draw_thread->detach();
 }

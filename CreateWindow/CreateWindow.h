@@ -4,6 +4,8 @@
 #include <gtk/gtk.h>
 #include <sigc++/sigc++.h>
 
+#include "Grid.h"
+
 using ID = int;
 
 class CreateWindow {
@@ -25,6 +27,7 @@ private:
     int height;
 
     GtkWidget *window = NULL;
+    Grid* grid = nullptr;
 };
 
 #endif // CREATEWINDOW_H
