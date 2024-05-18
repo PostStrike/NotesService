@@ -32,6 +32,7 @@ static gboolean on_button_press_event(GtkWidget *widget, GdkEventButton *event, 
 
     grid->cursor.x = new_coords.first;
     grid->cursor.y = new_coords.second;
+    grid->t = 6;
 
     return FALSE; 
 }
