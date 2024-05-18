@@ -6,7 +6,8 @@ project(${project})
 set(CMAKE_CXX_STANDARD 17)
 
 set(${project}_HEADERS
-        Grid.h)
+        Grid.h
+	Cursor.h)
 
 set(${project}_SOURCES
         Grid.cpp)
