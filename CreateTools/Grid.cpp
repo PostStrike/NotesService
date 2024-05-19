@@ -12,47 +12,37 @@ std::map<int, std::pair<int, int>> Grid::font_rectangles = {
 };
 
 
-Grid::Grid(const int width, const int height, const int font_size) {
+Grid::Grid(const int width, const int height, const int font_size, GtkWidget* window) {
     this->width = width;
     this->height = height;
     this->font_size = font_size;
 
+    box = gtk_fixed_new();
+    gtk_container_add(GTK_CONTAINER(window), box);
+
     create_grid();
+}
+
+Grid::~Grid() {
 }
 
 void Grid::create_grid() {
     num_rows = height / font_rectangles[font_size].second;
     num_cols = width / font_rectangles[font_size].first;
 
-    grid.assign(num_rows, std::vector<char>(num_cols, ' '));
+    grid.assign(num_rows, std::vector<Fixed>(num_cols));
 }
-
-/*
-void Grid::draw(cairo_t *cr, char sym) {
-    std::string file_path = "../img/symbol_images_" + std::to_string(font_size)
-                                  + "/" + std::to_string(static_cast<int>(sym)) + ".png";
-    std::cout << file_path << std::endl;
-    cairo_surface_t *image_surface = cairo_image_surface_create_from_png(file_path.c_str());
-
-    cairo_set_source_surface(cr, image_surface, cursor_position.first, cursor_position.second);
-    cairo_paint(cr);
-
-    // Очищение памяти
-    cairo_surface_destroy(image_surface);
-}
-*/
 
 void Grid::draw_cursor(GtkWidget* window) {
     std::string file_path = "../img/symbol_images_" + std::to_string(font_size)
                                                           + "/cursor_text.png";
 
     if(cursor.container == nullptr) {
-        cursor.child = gtk_image_new_from_file (file_path.c_str());
+        cursor.child = gtk_image_new_from_file(file_path.c_str());
         cursor.container = gtk_fixed_new();
         gtk_fixed_put(GTK_FIXED(cursor.container), cursor.child, cursor.x * font_rectangles[font_size].first, 
                                                                 cursor.y * font_rectangles[font_size].second);
-        gtk_container_add(GTK_CONTAINER(window), cursor.container);
-
+        gtk_fixed_put(GTK_FIXED(box), cursor.container, 0, 0);
         gtk_widget_show_all(window);
 
         return;
@@ -61,11 +51,28 @@ void Grid::draw_cursor(GtkWidget* window) {
     gtk_fixed_move(GTK_FIXED(cursor.container), cursor.child, cursor.x * font_rectangles[font_size].first, 
                                                               cursor.y * font_rectangles[font_size].second);
     gtk_widget_show(cursor.container);
+    printf("x = %d, y = %d, \n", cursor.x, cursor.y);
 }   
 
-void Grid::delete_cursor(GtkWidget* window) {
-    if(cursor.container == nullptr) return;
+void Grid::draw_symbol(GtkWidget* window, int symbol_code) {
+    if(grid[cursor.x][cursor.y].defined) {
+        gtk_container_remove(GTK_CONTAINER(box), grid[cursor.x][cursor.y].parent);
+    }
+    std::string file_path = "../img/symbol_images_" + std::to_string(font_size)
+                                                          + "/" + std::to_string(symbol_code) + ".png";
+    Fixed fix;
+    fix.child = gtk_image_new_from_file(file_path.c_str());
+    fix.parent = gtk_fixed_new();
+    fix.defined = true;
+    grid[cursor.x][cursor.y] = fix;
+    gtk_fixed_put(GTK_FIXED(grid[cursor.x][cursor.y].parent), grid[cursor.x][cursor.y].child, 0, 0);
+    
+    gtk_fixed_put(GTK_FIXED(box), grid[cursor.x][cursor.y].parent, cursor.x * font_rectangles[font_size].first, 
+                  cursor.y * font_rectangles[font_size].second);
+    gtk_widget_show(grid[cursor.x][cursor.y].parent); 
+}
 
+void Grid::delete_cursor(GtkWidget* window) {
     gtk_widget_hide(cursor.container);
 }
 

@@ -4,19 +4,22 @@
 #include <map>
 #include <chrono>
 #include <thread>
+#include <utility>
 
 #include <gtk/gtk.h>
 
 #include "Cursor.h"
+#include "Fixed.h"
 
 #ifndef CREATETOOLS_H
 #define CREATETOOLS_H
 
 class Grid {
 public:
-    Grid(const int, const int, const int);
+    Grid(const int, const int, const int, GtkWidget*);
+    ~Grid();
 
-    void draw(cairo_t*, char);
+    void draw_symbol(GtkWidget*, int);
     void draw_cursor(GtkWidget*);
     void delete_cursor(GtkWidget*);
     std::pair<int, int> nearest_cell(int, int);
@@ -38,7 +41,8 @@ private:
     int num_rows;
     int num_cols;
 
-    std::vector<std::vector<char>> grid;
+    std::vector<std::vector<Fixed>> grid;
+    GtkWidget* box;
 
     void create_grid();
 };

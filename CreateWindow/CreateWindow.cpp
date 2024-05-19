@@ -51,7 +51,7 @@ static void on_realize(GtkWidget *widget, gpointer data) {
 
 void CreateWindow::show() {
     //отрисовка сетки
-    grid = new Grid(width, height, 20);
+    grid = new Grid(width, height, 20, window);
     std::thread* draw_thread = new std::thread(draw_loop, window, grid);
     draw_thread->detach();
 
