@@ -1,4 +1,6 @@
 struct Fixed {
-	GtkWidget *parent = nullptr;
-	GtkWidget *child = nullptr;
+    GtkWidget *parent;
+    GtkWidget *child;
+
+    bool defined = false;
 };
