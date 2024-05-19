@@ -14,11 +14,11 @@
 
 class Grid {
 public:
-    Grid(const int, const int, const int);
+    Grid(GtkWidget*, GtkWidget*, const int, const int, const int);
 
-    void draw(cairo_t*, char);
-    void draw_cursor(GtkWidget*);
-    void delete_cursor(GtkWidget*);
+    void draw(char);
+    void draw_cursor();
+    void delete_cursor();
     std::pair<int, int> nearest_cell(int, int);
 
     // Время существования сетки
@@ -26,9 +26,15 @@ public:
 
     //курсор
     Cursor cursor;
+    
+    //область рисования
+    GtkWidget* drawing_area;
 
     static std::map<int, std::pair<int, int>> font_rectangles;
 private:
+    GtkWidget* window;
+    GtkWidget* box;
+
     // Переменные для области отрисовки
     int width;
     int height;

@@ -8,13 +8,13 @@ CreateWindow::CreateWindow(GtkWidget *window, const int width, const int height)
 }
 
 
-void draw_loop(GtkWidget* window, Grid *grid) {
+void draw_loop(Grid *grid) {
     while(true) {
         if(grid->t % 6 == 0) {
-            grid->draw_cursor(window);
+            grid->draw_cursor();
         }
         else if(grid->t % 6 == 3){
-            grid->delete_cursor(window);
+            grid->delete_cursor();
         }
 
         grid->t++;
@@ -49,10 +49,21 @@ static void on_realize(GtkWidget *widget, gpointer data) {
     gtk_widget_set_events(widget, GDK_ENTER_NOTIFY_MASK);
 }
 
+gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, gpointer data) {
+    Grid *grid = static_cast<Grid*>(data);
+
+    //grid->draw(cr, 'A');
+    
+    return FALSE;
+}
+
 void CreateWindow::show() {
+    GtkWidget* box = gtk_overlay_new();
+    gtk_container_add(GTK_CONTAINER(window), box);
+
     //отрисовка сетки
-    grid = new Grid(width, height, 20);
-    std::thread* draw_thread = new std::thread(draw_loop, window, grid);
+    grid = new Grid(window, box, width, height, 20);
+    std::thread* draw_thread = new std::thread(draw_loop, grid);
     draw_thread->detach();
 
     //отслеживание мышки
@@ -62,4 +73,7 @@ void CreateWindow::show() {
     //смена курсора мышки
     g_signal_connect(window, "enter-notify-event", G_CALLBACK(on_enter_notify), NULL);
     g_signal_connect(window, "realize", G_CALLBACK(on_realize), NULL);
+
+    //рисование символов
+    //g_signal_connect(G_OBJECT(drawing_area), "draw", G_CALLBACK(on_draw_event), grid);
 }
