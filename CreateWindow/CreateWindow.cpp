@@ -8,17 +8,17 @@ CreateWindow::CreateWindow(GtkWidget *window, const int width, const int height)
 }
 
 
-void draw_loop(GtkWidget* window, Grid *grid) {
+void draw_loop(Grid *grid) {
     while(true) {
-        if(grid->t % 6 == 0) {
-            grid->draw_cursor(window);
+        if (grid->t % 6 == 0) {
+            grid->draw_cursor();
+        } else if (grid->t % 6 == 3) {
+            grid->delete_cursor();
         }
-        else if(grid->t % 6 == 3){
-            grid->delete_cursor(window);
-        }
-
         grid->t++;
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
 }
 
@@ -49,10 +49,32 @@ static void on_realize(GtkWidget *widget, gpointer data) {
     gtk_widget_set_events(widget, GDK_ENTER_NOTIFY_MASK);
 }
 
+static gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer data) {
+    int key_code = event->keyval;
+    Grid *grid = static_cast<Grid*>(data);
+    
+    bool flag = false;
+    if(key_code >= 'a' && key_code <= 'z') flag = true; 
+    if(key_code >= 'A' && key_code <= 'Z') flag = true;
+    std::string special_alph = ",.{}[]''<>+=-:;";
+    if(special_alph.find(key_code) != std::string::npos) {
+        flag = true;
+    }
+
+    if(flag) {
+        grid->draw(key_code);
+    }
+
+    return FALSE;  
+}
+
 void CreateWindow::show() {
+    GtkWidget* box = gtk_overlay_new();
+    gtk_container_add(GTK_CONTAINER(window), box);
+
     //отрисовка сетки
-    grid = new Grid(width, height, 20, window);
-    std::thread* draw_thread = new std::thread(draw_loop, window, grid);
+    grid = new Grid(window, box, width, height, 20);
+    std::thread* draw_thread = new std::thread(draw_loop, grid);
     draw_thread->detach();
 
     //отслеживание мышки
@@ -62,4 +84,7 @@ void CreateWindow::show() {
     //смена курсора мышки
     g_signal_connect(window, "enter-notify-event", G_CALLBACK(on_enter_notify), NULL);
     g_signal_connect(window, "realize", G_CALLBACK(on_realize), NULL);
+
+    //обработка нажатия кнопок
+    g_signal_connect(G_OBJECT(window), "key-press-event", G_CALLBACK(on_key_press), grid);
 }

@@ -4,24 +4,22 @@
 #include <map>
 #include <chrono>
 #include <thread>
-#include <utility>
+#include <queue>
 
 #include <gtk/gtk.h>
 
 #include "Cursor.h"
-#include "Fixed.h"
 
 #ifndef CREATETOOLS_H
 #define CREATETOOLS_H
 
 class Grid {
 public:
-    Grid(const int, const int, const int, GtkWidget*);
-    ~Grid();
+    Grid(GtkWidget*, GtkWidget*, const int, const int, const int);
 
-    void draw_symbol(GtkWidget*, int);
-    void draw_cursor(GtkWidget*);
-    void delete_cursor(GtkWidget*);
+    void draw(int);
+    void draw_cursor();
+    void delete_cursor();
     std::pair<int, int> nearest_cell(int, int);
 
     // Время существования сетки
@@ -29,9 +27,15 @@ public:
 
     //курсор
     Cursor cursor;
+    
+    //область рисования
+    GtkWidget* drawing_area;
 
     static std::map<int, std::pair<int, int>> font_rectangles;
 private:
+    GtkWidget* window;
+    GtkWidget* box;
+
     // Переменные для области отрисовки
     int width;
     int height;
@@ -41,8 +45,7 @@ private:
     int num_rows;
     int num_cols;
 
-    std::vector<std::vector<Fixed>> grid;
-    GtkWidget* box;
+    std::vector<std::vector<char>> grid;
 
     void create_grid();
 };

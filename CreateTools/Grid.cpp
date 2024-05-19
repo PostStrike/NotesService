@@ -2,7 +2,7 @@
 
 std::map<int, std::pair<int, int>> Grid::font_rectangles = {
     {10, {10, 14}},
-    {20, {20, 28}},
+    {20, {18, 26}},
     {30, {30, 42}},
     {40, {40, 56}},
     {50, {50, 70}},
@@ -12,67 +12,75 @@ std::map<int, std::pair<int, int>> Grid::font_rectangles = {
 };
 
 
-Grid::Grid(const int width, const int height, const int font_size, GtkWidget* window) {
+Grid::Grid(GtkWidget* window, GtkWidget* box, const int width, const int height, const int font_size) {
+    this->window = window;
     this->width = width;
     this->height = height;
     this->font_size = font_size;
-
-    box = gtk_fixed_new();
-    gtk_container_add(GTK_CONTAINER(window), box);
+    this->box = box;
 
     create_grid();
 }
 
-Grid::~Grid() {
-}
-
 void Grid::create_grid() {
-    num_rows = height / font_rectangles[font_size].second;
+    num_rows = height / font_rectangles[font_size].second - 1;
     num_cols = width / font_rectangles[font_size].first;
 
-    grid.assign(num_rows, std::vector<Fixed>(num_cols));
+    grid.assign(num_rows, std::vector<char>(num_cols, 0));
 }
 
-void Grid::draw_cursor(GtkWidget* window) {
+void Grid::draw(int key_code) {
+    std::cout << key_code << std::endl;
+    if(grid[cursor.x][cursor.y]) {
+        return;
+    }
+    grid[cursor.x][cursor.y] = key_code;
+
+    std::string file_path = "../img/symbol_images_" + std::to_string(font_size) + "/" + std::to_string(key_code) + ".png";
+
+    GtkWidget* image = gtk_image_new_from_file(file_path.c_str());  
+    GtkWidget* fix = gtk_fixed_new();
+
+    int x = cursor.x * font_rectangles[font_size].first;
+    int y = cursor.y * font_rectangles[font_size].second;
+
+    gtk_fixed_put(GTK_FIXED(fix), image, x, y);
+    
+    gtk_overlay_add_overlay(GTK_OVERLAY(box), fix);
+
+    gtk_widget_show(fix); 
+    gtk_widget_show(image); 
+}
+
+void Grid::draw_cursor() {
     std::string file_path = "../img/symbol_images_" + std::to_string(font_size)
                                                           + "/cursor_text.png";
 
     if(cursor.container == nullptr) {
         cursor.child = gtk_image_new_from_file(file_path.c_str());
         cursor.container = gtk_fixed_new();
-        gtk_fixed_put(GTK_FIXED(cursor.container), cursor.child, cursor.x * font_rectangles[font_size].first, 
-                                                                cursor.y * font_rectangles[font_size].second);
-        gtk_fixed_put(GTK_FIXED(box), cursor.container, 0, 0);
-        gtk_widget_show_all(window);
+        
+        gtk_fixed_put(GTK_FIXED(cursor.container), cursor.child, 
+                    cursor.x * font_rectangles[font_size].first - font_rectangles[font_size].first / 2, 
+                    cursor.y * font_rectangles[font_size].second);
 
+        gtk_overlay_add_overlay(GTK_OVERLAY(box), cursor.container);
+        gtk_widget_show(box); 
+        gtk_widget_show(cursor.container); 
+        gtk_widget_show(cursor.child); 
         return;
     }
 
-    gtk_fixed_move(GTK_FIXED(cursor.container), cursor.child, cursor.x * font_rectangles[font_size].first, 
-                                                              cursor.y * font_rectangles[font_size].second);
+    gtk_fixed_move(GTK_FIXED(cursor.container), cursor.child, 
+                  cursor.x * font_rectangles[font_size].first - font_rectangles[font_size].first / 2, 
+                  cursor.y * font_rectangles[font_size].second);
+
     gtk_widget_show(cursor.container);
-    printf("x = %d, y = %d, \n", cursor.x, cursor.y);
 }   
 
-void Grid::draw_symbol(GtkWidget* window, int symbol_code) {
-    if(grid[cursor.x][cursor.y].defined) {
-        gtk_container_remove(GTK_CONTAINER(box), grid[cursor.x][cursor.y].parent);
-    }
-    std::string file_path = "../img/symbol_images_" + std::to_string(font_size)
-                                                          + "/" + std::to_string(symbol_code) + ".png";
-    Fixed fix;
-    fix.child = gtk_image_new_from_file(file_path.c_str());
-    fix.parent = gtk_fixed_new();
-    fix.defined = true;
-    grid[cursor.x][cursor.y] = fix;
-    gtk_fixed_put(GTK_FIXED(grid[cursor.x][cursor.y].parent), grid[cursor.x][cursor.y].child, 0, 0);
-    
-    gtk_fixed_put(GTK_FIXED(box), grid[cursor.x][cursor.y].parent, cursor.x * font_rectangles[font_size].first, 
-                  cursor.y * font_rectangles[font_size].second);
-    gtk_widget_show(grid[cursor.x][cursor.y].parent); 
-}
+void Grid::delete_cursor() {
+    if(cursor.container == nullptr) return;
 
-void Grid::delete_cursor(GtkWidget* window) {
     gtk_widget_hide(cursor.container);
 }
 
