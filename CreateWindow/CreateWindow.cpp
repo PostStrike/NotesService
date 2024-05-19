@@ -10,15 +10,15 @@ CreateWindow::CreateWindow(GtkWidget *window, const int width, const int height)
 
 void draw_loop(Grid *grid) {
     while(true) {
-        if(grid->t % 6 == 0) {
+        if (grid->t % 6 == 0) {
             grid->draw_cursor();
-        }
-        else if(grid->t % 6 == 3){
+        } else if (grid->t % 6 == 3) {
             grid->delete_cursor();
         }
-
         grid->t++;
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
 }
 
@@ -49,12 +49,23 @@ static void on_realize(GtkWidget *widget, gpointer data) {
     gtk_widget_set_events(widget, GDK_ENTER_NOTIFY_MASK);
 }
 
-gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, gpointer data) {
+static gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer data) {
+    int key_code = event->keyval;
     Grid *grid = static_cast<Grid*>(data);
-
-    //grid->draw(cr, 'A');
     
-    return FALSE;
+    bool flag = false;
+    if(key_code >= 'a' && key_code <= 'z') flag = true; 
+    if(key_code >= 'A' && key_code <= 'Z') flag = true;
+    std::string special_alph = ",.{}[]''<>+=-:;";
+    if(special_alph.find(key_code) != std::string::npos) {
+        flag = true;
+    }
+
+    if(flag) {
+        grid->draw(key_code);
+    }
+
+    return FALSE;  
 }
 
 void CreateWindow::show() {
@@ -74,6 +85,6 @@ void CreateWindow::show() {
     g_signal_connect(window, "enter-notify-event", G_CALLBACK(on_enter_notify), NULL);
     g_signal_connect(window, "realize", G_CALLBACK(on_realize), NULL);
 
-    //рисование символов
-    //g_signal_connect(G_OBJECT(drawing_area), "draw", G_CALLBACK(on_draw_event), grid);
+    //обработка нажатия кнопок
+    g_signal_connect(G_OBJECT(window), "key-press-event", G_CALLBACK(on_key_press), grid);
 }

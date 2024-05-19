@@ -11,7 +11,7 @@ for font_size in range(10, 81, 10):
     font = ImageFont.truetype(font_path, font_size)
 
     for char in string.printable:
-        image = Image.new('RGB', (font_size, int(font_size + font_size * 0.4)), color='white')
+        image = Image.new('RGBA', (font_size, int(font_size + font_size * 0.4)))
         draw = ImageDraw.Draw(image)
         
         draw.text((0, 0), char, fill='black', font=font)

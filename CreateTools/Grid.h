@@ -4,6 +4,7 @@
 #include <map>
 #include <chrono>
 #include <thread>
+#include <queue>
 
 #include <gtk/gtk.h>
 
@@ -16,7 +17,7 @@ class Grid {
 public:
     Grid(GtkWidget*, GtkWidget*, const int, const int, const int);
 
-    void draw(char);
+    void draw(int);
     void draw_cursor();
     void delete_cursor();
     std::pair<int, int> nearest_cell(int, int);
