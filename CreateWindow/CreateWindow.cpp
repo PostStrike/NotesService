@@ -71,12 +71,32 @@ static gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer dat
             break;
         case GDK_KEY_Return:
             grid->to_new_row();
+            grid->show_all();
             break;
         case GDK_KEY_space:
             grid->space();
+            grid->show_all();
             break;
         case GDK_KEY_BackSpace:
             grid->backspace();
+            grid->show_all();
+            break;
+        case GDK_KEY_Left:
+            grid->left_arrow();
+            grid->show_all();
+            break;
+        case GDK_KEY_Right:
+            grid->right_arrow();
+            grid->show_all();
+            break;
+        case GDK_KEY_Down: 
+            grid->down_arrow();
+            grid->show_all();
+            break;
+        case GDK_KEY_Up: 
+            grid->up_arrow();
+            grid->show_all();
+            break;
         default:
             break;
     }

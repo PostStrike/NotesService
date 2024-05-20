@@ -59,24 +59,26 @@ void Grid::draw(int key_code) {
     std::string space_path = "symbol_images_" + std::to_string(font_size) + "/" + std::to_string(key_code) + ".png";
     
     int real_size = spaces[space_path].first + spaces[space_path].second;
-    int x = cursor.x;
+    int x = cursor.x; 
     int y = cursor.y;
 
-    Letter obj;
-    obj.child = gtk_image_new_from_file(file_path.c_str());  
-    obj.container = gtk_fixed_new();
-    obj.size = real_size;
-    obj.x = x;
-    obj.y = y;
+    Letter* obj = new Letter;
+    obj->child = gtk_image_new_from_file(file_path.c_str());  
+    obj->container = gtk_fixed_new();
+    obj->size = real_size;
+    obj->x = x;
+    obj->y = y;
+    obj->sym = key_code;
 
-    grid[y].push_back(obj);
+    grid.push_back(obj);
+    objects.push_back(obj);
 
-    gtk_fixed_put(GTK_FIXED(grid[y][grid[y].size() - 1].container), grid[y][grid[y].size() - 1].child, x, y);
+    gtk_fixed_put(GTK_FIXED(grid.back()->container), grid.back()->child, x, y);
     
-    gtk_overlay_add_overlay(GTK_OVERLAY(box), grid[y][grid[y].size() - 1].container);
+    gtk_overlay_add_overlay(GTK_OVERLAY(box), grid.back()->container);
 
-    gtk_widget_show(grid[y][grid[y].size() - 1].container); 
-    gtk_widget_show(grid[y][grid[y].size() - 1].child); 
+    gtk_widget_show(grid.back()->container); 
+    gtk_widget_show(grid.back()->child); 
     
     cursor.x = cursor.x + real_size;
     cursor.move();
@@ -95,6 +97,9 @@ void Grid::draw_cursor() {
         gtk_widget_show(box); 
         gtk_widget_show(cursor.container); 
         gtk_widget_show(cursor.child); 
+
+        objects.push_back(&cursor);
+
         return;
     }
 
@@ -116,7 +121,29 @@ void Grid::space() {
 }
 
 void Grid::backspace() {
-    cursor.move_backward(grid);
+    cursor.move_backward(grid, objects);
+}
+
+void Grid::left_arrow() { 
+    cursor.left_arrow(grid);
+}
+
+void Grid::right_arrow() {
+    cursor.right_arrow(grid);
+}
+
+void Grid::down_arrow() {
+    cursor.down_arrow();
+}
+
+void Grid::up_arrow() {
+    cursor.up_arrow();
+}
+
+void Grid::show_all() {
+    for(Object* obj : objects) {
+        obj->move();
+    }
 }
 
 int binsearch(int l, int r, int d, int x) {
@@ -141,9 +168,9 @@ std::pair<int, int> Grid::nearest_cell(int x, int y) {
     int new_y = binsearch(0, num_rows, font_rectangles[font_size].second, y) * font_rectangles[font_size].second;
 
     int new_x = x;
-    for(const Letter& el : grid[new_y]) {
-        if(new_x > el.x && new_x <= el.x + el.size) {
-            new_x = el.x + el.size;
+    for(const Letter* el : grid) {
+        if(new_x > el->x && new_x <= el->x + el->size) {
+            new_x = el->x;
         }
     }
 

@@ -5,6 +5,7 @@
 #include <chrono>
 #include <thread>
 #include <queue>
+#include <algorithm>
 
 #include <gtk/gtk.h>
 
@@ -24,7 +25,12 @@ public:
     void to_new_row();
     void space();
     void backspace();
+    void left_arrow();
+    void right_arrow();
+    void up_arrow();
+    void down_arrow();
     void move_objects_back(int, int, int);
+    void show_all();
 
     // Время существования сетки
     int t = 0;
@@ -50,7 +56,8 @@ private:
     int num_rows;
     int num_cols;
 
-    std::map<int, std::vector<Letter>> grid;
+    std::vector<Letter*> grid;
+    std::vector<Object*> objects;
 
     void create_grid();
 };
