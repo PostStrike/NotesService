@@ -18,7 +18,7 @@ void draw_loop(Grid *grid) {
         grid->t++;
 
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 }
 
@@ -32,7 +32,7 @@ static gboolean on_button_press_event(GtkWidget *widget, GdkEventButton *event, 
 
     grid->cursor.x = new_coords.first;
     grid->cursor.y = new_coords.second;
-    grid->t = 6;
+    grid->t = 3;
 
     return FALSE; 
 }
@@ -63,6 +63,22 @@ static gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer dat
 
     if(flag) {
         grid->draw(key_code);
+    }
+
+    switch (event->keyval) {
+        case GDK_KEY_Escape:
+            g_print("Escape pressed\n");
+            break;
+        case GDK_KEY_Return:
+            grid->to_new_row();
+            break;
+        case GDK_KEY_space:
+            grid->space();
+            break;
+        case GDK_KEY_BackSpace:
+            grid->backspace();
+        default:
+            break;
     }
 
     return FALSE;  

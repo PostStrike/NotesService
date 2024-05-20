@@ -8,7 +8,7 @@
 
 #include <gtk/gtk.h>
 
-#include "Cursor.h"
+#include "Objects.h"
 
 #ifndef CREATETOOLS_H
 #define CREATETOOLS_H
@@ -21,6 +21,10 @@ public:
     void draw_cursor();
     void delete_cursor();
     std::pair<int, int> nearest_cell(int, int);
+    void to_new_row();
+    void space();
+    void backspace();
+    void move_objects_back(int, int, int);
 
     // Время существования сетки
     int t = 0;
@@ -32,6 +36,7 @@ public:
     GtkWidget* drawing_area;
 
     static std::map<int, std::pair<int, int>> font_rectangles;
+    static std::map<std::string, std::pair<int, int>> spaces; 
 private:
     GtkWidget* window;
     GtkWidget* box;
@@ -45,7 +50,7 @@ private:
     int num_rows;
     int num_cols;
 
-    std::vector<std::vector<char>> grid;
+    std::map<int, std::vector<Letter>> grid;
 
     void create_grid();
 };
