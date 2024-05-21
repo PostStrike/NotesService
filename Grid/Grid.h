@@ -21,7 +21,6 @@ public:
     ~Grid();
 
     void draw(int);
-    void draw_const(int, int, int);
     void draw_cursor();
     void delete_cursor();
     std::pair<int, int> nearest_cell(int, int);

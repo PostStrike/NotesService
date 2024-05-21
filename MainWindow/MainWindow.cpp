@@ -62,7 +62,7 @@ void clear_window(gpointer data, ID id) {
 void MainWindow::on_button_open_clicked(GtkWidget *widget, gpointer data) {
     g_print("Кнопка \"Открыть заметки\" нажата!\n"); //log
 
-    clear_window(data, -1);
+    clear_window(data, 2);
 }
 
 void MainWindow::on_button_create_clicked(GtkWidget *widget, gpointer data) {
@@ -74,7 +74,7 @@ void MainWindow::on_button_create_clicked(GtkWidget *widget, gpointer data) {
 void MainWindow::on_button_exit_clicked(GtkWidget *widget, gpointer data) {
     g_print("Кнопка \"Выйти\" нажата!\n"); //log
 
-    clear_window(data, 2);
+    clear_window(data, 3);
 
     gtk_main_quit();
 }

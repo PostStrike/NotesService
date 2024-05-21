@@ -2,12 +2,14 @@
 
 #include "MainWindow/MainWindow.h"
 #include "CreateWindow/CreateWindow.h"
+#include "ViewWindow/ViewWindow.h"
 
 const int width = 800;
 const int height = 600; 
 
 const int MainWindowId = 0;
 const int CreateWindowId = 1;
+const int ViewWindowId = 2;
 
 struct State {
     int id = 0;
@@ -92,7 +94,13 @@ void loop(ID process) {
         state.name = "CreateWindow"; 
         show_window<CreateWindow>();        
         return;
-
+    
+    case ViewWindowId:
+        state.id = ViewWindowId;
+        state.name = "ViewWindow";
+        show_window<ViewWindow>();
+        return;
+        
     default:
         return;
     

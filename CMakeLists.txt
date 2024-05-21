@@ -11,6 +11,7 @@ set(${project}_SOURCES
 add_subdirectory(MainWindow)  
 add_subdirectory(CreateWindow)   
 add_subdirectory(CreateTools)  
+add_subdirectory(ViewWindow)  
 
 set(${project}_SOURCE_LIST
         ${${project}_SOURCES})
@@ -18,7 +19,7 @@ set(${project}_SOURCE_LIST
 add_executable(${project}
         ${${project}_SOURCE_LIST})
 
-target_link_libraries(${project} MainWindow CreateWindow)
+target_link_libraries(${project} MainWindow CreateWindow ViewWindow)
 
 # GTK
 find_package(PkgConfig REQUIRED)

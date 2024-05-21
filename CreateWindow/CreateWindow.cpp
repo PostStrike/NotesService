@@ -2,6 +2,7 @@
 
 bool stop = false;
 std::thread *draw_thread;
+
 std::vector<gulong> handlers;
 
 CreateWindow::CreateWindow(GtkWidget *window, const int width, const int height){
@@ -92,21 +93,21 @@ static gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer dat
     KeyData* cur_data = static_cast<KeyData*>(data);
     Grid* grid = static_cast<Grid*>(cur_data->grid);
 
+    if((event->state & GDK_CONTROL_MASK) && (key_code == 's' || key_code == 'S')) {
+        grid->save();
+        return TRUE; 
+    }
+
     bool flag = false;
     if(key_code >= 'a' && key_code <= 'z') flag = true; 
     if(key_code >= 'A' && key_code <= 'Z') flag = true;
-    std::string special_alph = ",.{}[]''<>+=-:;";
+    std::string special_alph = ",.{}[]''<>+=-:;?!0123456789";
     if(special_alph.find(key_code) != std::string::npos) {
         flag = true;
     }
     
     if(flag) {
         grid->draw(key_code);
-    }
-
-    if((event->state & GDK_CONTROL_MASK) && (key_code == 's' || key_code == 'S')) {
-        grid->save();
-        return TRUE; 
     }
 
     switch (event->keyval) {

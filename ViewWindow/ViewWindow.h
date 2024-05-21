@@ -1,17 +1,19 @@
-#ifndef CREATEWINDOW_H
-#define CREATEWINDOW_H
+#ifndef VIEWWINDOW_H
+#define VIEWWINDOW_H
 
 #include <gtk/gtk.h>
 #include <sigc++/sigc++.h>
+#include <dirent.h>
 
 #include "Grid.h"
 
 using ID = int;
 
-class CreateWindow {
+class ViewWindow {
 public:
-    CreateWindow(GtkWidget *, const int, const int);
+    ViewWindow(GtkWidget *, const int, const int);
     void show();
+    void show_grid();
 
     sigc::signal<void, int> response_changed;
 
@@ -27,7 +29,6 @@ private:
     int height;
 
     GtkWidget *window = NULL;
-    Grid* grid;
 };
 
 #ifndef KEYDATA_H
@@ -35,9 +36,14 @@ private:
 
 struct KeyData {
     Grid* grid;
-    CreateWindow* main_window;
+    ViewWindow* main_window;
 };
 
 #endif // KEYDATA_H
 
-#endif // CREATEWINDOW_H
+struct GridData {
+    const char* filename;
+    GtkWidget* window;
+};
+
+#endif // VIEWWINDOW_H

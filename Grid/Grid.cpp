@@ -96,31 +96,6 @@ void Grid::draw(int key_code) {
     cursor.move();
 }
 
-void Grid::draw_const(int key_code, int x, int y) {
-    std::string file_path = "../img/symbol_images_" + std::to_string(font_size) + "/" + std::to_string(key_code) + ".png";
-    std::string space_path = "symbol_images_" + std::to_string(font_size) + "/" + std::to_string(key_code) + ".png";
-    
-    int real_size = spaces[space_path].first + spaces[space_path].second;
-
-    Letter* obj = new Letter;
-    obj->child = gtk_image_new_from_file(file_path.c_str());  
-    obj->container = gtk_fixed_new();
-    obj->size = real_size;
-    obj->x = x;
-    obj->y = y;
-    obj->sym = key_code;
-
-    grid.push_back(obj);
-    objects.push_back(obj);
-
-    gtk_fixed_put(GTK_FIXED(grid.back()->container), grid.back()->child, x, y);
-    
-    gtk_overlay_add_overlay(GTK_OVERLAY(box), grid.back()->container);
-
-    gtk_widget_show(grid.back()->container); 
-    gtk_widget_show(grid.back()->child); 
-}
-
 void Grid::draw_cursor() {
     std::string file_path = "../img/symbol_images_" + std::to_string(font_size)
                                                           + "/cursor_text.png";
@@ -215,10 +190,9 @@ std::pair<int, int> Grid::nearest_cell(int x, int y) {
 }
 
 void save_grid_to_file(std::string& filename, Grid* grid) {
-    filename = "../notes/" + filename + ".txt";
+    filename = "../notes/" + filename;
     std::ofstream file(filename);
 
-    file << grid->get_grid().size() << "\n";
     for(const Letter* obj : grid->get_grid()) {
         file << obj->x << " " << obj->y << " " << obj->sym << "\n";
     }
