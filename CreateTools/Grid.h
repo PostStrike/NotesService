@@ -17,6 +17,7 @@
 class Grid {
 public:
     Grid(GtkWidget*, GtkWidget*, const int, const int, const int);
+    ~Grid();
 
     void draw(int);
     void draw_cursor();

@@ -121,10 +121,6 @@ public:
 		return false;
 	}
 
-	void move_backward(std::vector<Letter*> &grid) {
-		
-	}
-
 	virtual void move() {
 		gtk_fixed_move(GTK_FIXED(container), child, x, y);
     	gtk_widget_show(container);
@@ -152,6 +148,29 @@ public:
 				grid[ind]->move_forward(grid, grid[ind]->x - copy_x, ind, x, y);
 			}
 		}
+	}
+
+	void move_letters(std::vector<Letter*> &grid, int dist) {
+		int copy_x = x;
+		int copy_y = y;
+
+		x += dist;
+		if(x >= font_rectangles[font_size].first * num_cols) {
+			y += font_rectangles[font_size].second;
+			x = 0;
+		}
+
+		int i = copy_y;
+		int copy_size = grid.size();
+		int mx = 0;
+		for(int ind = grid.size() - 1; ind >= 0; ind--) {
+			if(grid[ind]->y != i) continue;
+			if(grid[ind]->x >= copy_x) {
+				grid[ind]->move_forward(grid, grid[ind]->x - copy_x, ind, x, y);
+			}
+		}
+
+		x -= dist;
 	}
 
 	void enter() {
@@ -236,7 +255,84 @@ public:
 		x = (copy_x == obj->x) ? obj->x + obj->size : obj->x;
 	}
 
+	std::vector<std::pair<Letter*, int>> get_phrase(std::vector<Letter*> &grid, int i, int free_space) {
+		std::vector<std::pair<Letter*, int>> temp;
+		for(int j = 0; j < grid.size(); ++j) {
+			if(grid[j]->y != i) continue;
+			temp.push_back({grid[j], j});
+		}
+	
+		std::vector<std::pair<Letter*, int>> res;
+
+		if(temp.size() == 0) {
+			for(int j = 0; j < grid.size(); ++j) {
+				if(grid[j]->y > i) {
+					grid[j]->y = grid[j]->y - font_rectangles[font_size].second;
+				}
+			}
+
+			return res; 
+		}
+
+		std::sort(temp.begin(), temp.end(), grid.back()->comp);
+
+		int max_i = 0;
+		for(int j = 0; j < temp.size(); ++j) {
+			if(temp[j].first->x > free_space) {
+				break;
+			}
+			max_i = j;
+		}
+
+		while(max_i + 1 < temp.size() && max_i >= 0 && temp[max_i + 1].first->x - temp[max_i].first->x - temp[max_i].first->size == 0) {
+			max_i -= 1;
+		}
+
+		for(int j = 0; j <= max_i; ++j) {
+			res.push_back(temp[j]);
+		}
+
+		return res;
+	}
+
+	void move_back(std::vector<Letter*> &grid) {
+		int left = -1;
+		int right = x;
+
+		Letter* obj = nullptr;
+		int ind = 0;
+		for(int i = 0; i < grid.size(); ++i) {
+			if(grid[i]->y != y) continue;
+			int a1 = grid[i]->x;
+			int a2 = grid[i]->x + grid[i]->size;
+			int b1 = left;
+			int b2 = right;
+			if((obj == nullptr || (b2 - a2 < b2 - obj->x - obj->size)) && b2 > a1 && b1 <= a1) {
+				obj = grid[i];
+				ind = i;
+			}
+		}
+
+		if(obj == nullptr) {
+			x = 0;
+		}
+		else {
+			x = obj->x + obj->size;
+		}
+
+		int free_space = font_rectangles[font_size].first * num_cols - x;
+
+		std::vector<std::pair<Letter*, int>> word = get_phrase(grid, y + font_rectangles[font_size].second, free_space);
+		for(int i = 0; i < word.size(); ++i) {
+			int ind = word[i].second;
+			grid[ind]->y = y;
+			grid[ind]->x = x + grid[ind]->x;
+		}
+	}
+
 	void move_backward(std::vector<Letter*> &grid, std::vector<Object*> &objects) {
+		int copy_y = y;
+		int copy_x = x;
 		int left = x - space;
 		int right = x;
 
@@ -260,12 +356,31 @@ public:
 				x = (y == 0) ? 0 : num_cols * font_rectangles[font_size].first;
 				y = std::max(y - font_rectangles[font_size].second, 0);
 			}
+
+			if(y == copy_y) {
+				for(int ind = 0; ind < grid.size(); ind++) {
+					if(grid[ind]->y == y && grid[ind]->x >= x) {
+						grid[ind]->x -= std::abs(copy_x - x);
+					}
+				}
+			}
+			else {
+				move_back(grid);
+			}
+
 			return;
 		}
 
 		x = obj->x;
 		gtk_container_remove(GTK_CONTAINER(box), obj->container);
+		delete grid[ind];
 		grid.erase(grid.begin() + ind);
 		objects.erase(objects.begin() + ind + 1);
+
+		for(int ind = 0; ind < grid.size(); ind++) {
+			if(grid[ind]->y == y && grid[ind]->x >= x) {
+				grid[ind]->x -= std::abs(copy_x - x);
+			}
+		}
 	}
 };

@@ -56,11 +56,26 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-template<typename T>
+template<class T> 
+class PrevWindow {
+public:
+    static T* window;
+};
+
+template<class T>
+T* PrevWindow<T>::window = nullptr;
+
+template<class T>
 void show_window() {
-    static T w(window, width, height);
-    w.show();
-    w.response_changed.connect(sigc::ptr_fun(&get_response));
+    if(PrevWindow<T>::window != nullptr) {
+        delete PrevWindow<T>::window;
+    }
+    
+    T* w = new T(window, width, height);
+    w->show();
+    w->response_changed.connect(sigc::ptr_fun(&get_response));
+
+    PrevWindow<T>::window = w;
 }
 
 void loop(ID process) {

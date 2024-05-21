@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(${project}_HEADERS
         Grid.h
-	Cursor.h)
+	Objects.h)
 
 set(${project}_SOURCES
         Grid.cpp)

@@ -37,7 +37,7 @@ MainWindow::MainWindow(GtkWidget *window, const int width, const int height) {
     this->height = height;
     this->window = window;
     gtk_window_set_title(GTK_WINDOW(this->window), "Main Window");
-
+    
     create_buttons();
 }
 

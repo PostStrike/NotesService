@@ -27,7 +27,12 @@ private:
     int height;
 
     GtkWidget *window = NULL;
-    Grid* grid = nullptr;
+    Grid* grid;
+};
+
+struct KeyData {
+    Grid* grid;
+    CreateWindow* main_window;
 };
 
 #endif // CREATEWINDOW_H

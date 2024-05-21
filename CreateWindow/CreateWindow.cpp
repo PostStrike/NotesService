@@ -1,5 +1,9 @@
 #include "CreateWindow.h"
 
+bool stop = false;
+std::thread *draw_thread;
+std::vector<gulong> handlers;
+
 CreateWindow::CreateWindow(GtkWidget *window, const int width, const int height){
     this->width = width;
     this->height = height;
@@ -7,9 +11,11 @@ CreateWindow::CreateWindow(GtkWidget *window, const int width, const int height)
     gtk_window_set_title(GTK_WINDOW(this->window), "Create Window");
 }
 
-
 void draw_loop(Grid *grid) {
     while(true) {
+        if(stop) {
+            return;
+        }  
         if (grid->t % 6 == 0) {
             grid->draw_cursor();
         } else if (grid->t % 6 == 3) {
@@ -17,12 +23,12 @@ void draw_loop(Grid *grid) {
         }
         grid->t++;
 
-
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 }
 
 static gboolean on_button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer data) {
+    if(stop) return TRUE;
     Grid* grid = static_cast<Grid*>(data);
 
     int x = static_cast<int>(event->x);
@@ -49,10 +55,37 @@ static void on_realize(GtkWidget *widget, gpointer data) {
     gtk_widget_set_events(widget, GDK_ENTER_NOTIFY_MASK);
 }
 
+void clear_window(CreateWindow* main_window, ID id) {
+    GtkWidget *window = main_window->get_window();
+    stop = true;
+    if (draw_thread && draw_thread->joinable()) {
+        draw_thread->join();
+    }
+    delete draw_thread;
+    draw_thread = nullptr;
+
+    //очищаем содержимое окна
+    GList *children = gtk_container_get_children(GTK_CONTAINER(window));    
+    for(GList *it = children; it != NULL; it = g_list_next(it)) {
+        gtk_widget_destroy(GTK_WIDGET(it->data));
+    }
+    g_list_free(children);
+
+    //отключаем обработчики
+    for (auto handler : handlers) {
+        g_signal_handler_disconnect(window, handler);
+    }
+    handlers.clear();
+
+    main_window->send_response(id);
+}
+
 static gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer data) {
     int key_code = event->keyval;
-    Grid *grid = static_cast<Grid*>(data);
-    
+
+    KeyData* cur_data = static_cast<KeyData*>(data);
+    Grid* grid = static_cast<Grid*>(cur_data->grid);
+
     bool flag = false;
     if(key_code >= 'a' && key_code <= 'z') flag = true; 
     if(key_code >= 'A' && key_code <= 'Z') flag = true;
@@ -67,8 +100,11 @@ static gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer dat
 
     switch (event->keyval) {
         case GDK_KEY_Escape:
-            g_print("Escape pressed\n");
-            break;
+            stop = true;
+            delete grid;
+            clear_window(cur_data->main_window, 0);
+            delete cur_data;
+            return TRUE;
         case GDK_KEY_Return:
             grid->to_new_row();
             grid->show_all();
@@ -108,19 +144,26 @@ void CreateWindow::show() {
     GtkWidget* box = gtk_overlay_new();
     gtk_container_add(GTK_CONTAINER(window), box);
 
-    //отрисовка сетки
     grid = new Grid(window, box, width, height, 20);
-    std::thread* draw_thread = new std::thread(draw_loop, grid);
-    draw_thread->detach();
+    stop = false; 
+    draw_thread = new std::thread(draw_loop, grid);
 
     //отслеживание мышки
-    g_signal_connect(window, "button-press-event", G_CALLBACK(on_button_press_event), grid);
+    gulong button_press_handler = g_signal_connect(window, "button-press-event", G_CALLBACK(on_button_press_event), grid);
+    handlers.push_back(button_press_handler);
+
     gtk_widget_add_events(window, GDK_BUTTON_PRESS_MASK);
 
     //смена курсора мышки
-    g_signal_connect(window, "enter-notify-event", G_CALLBACK(on_enter_notify), NULL);
-    g_signal_connect(window, "realize", G_CALLBACK(on_realize), NULL);
+    gulong enter_notify_handler = g_signal_connect(window, "enter-notify-event", G_CALLBACK(on_enter_notify), NULL);
+    handlers.push_back(enter_notify_handler);
+
+    gulong realize_handler = g_signal_connect(window, "realize", G_CALLBACK(on_realize), NULL);
+    handlers.push_back(realize_handler);
+
+    KeyData* data = new KeyData{grid, this};
 
     //обработка нажатия кнопок
-    g_signal_connect(G_OBJECT(window), "key-press-event", G_CALLBACK(on_key_press), grid);
+    gulong key_press_handler = g_signal_connect(G_OBJECT(window), "key-press-event", G_CALLBACK(on_key_press), data);
+    handlers.push_back(key_press_handler);
 }

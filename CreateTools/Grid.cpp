@@ -54,6 +54,15 @@ void Grid::create_grid() {
     Object::num_rows = num_rows;
 }
 
+Grid::~Grid() {
+    for(int i = 0; i < grid.size(); ++i) {
+        gtk_container_remove(GTK_CONTAINER(box), grid[i]->container);
+        delete grid[i];
+    }
+    gtk_container_remove(GTK_CONTAINER(box), cursor.container);
+    gtk_container_remove(GTK_CONTAINER(window), box);
+}
+
 void Grid::draw(int key_code) {
     std::string file_path = "../img/symbol_images_" + std::to_string(font_size) + "/" + std::to_string(key_code) + ".png";
     std::string space_path = "symbol_images_" + std::to_string(font_size) + "/" + std::to_string(key_code) + ".png";
@@ -69,6 +78,9 @@ void Grid::draw(int key_code) {
     obj->x = x;
     obj->y = y;
     obj->sym = key_code;
+
+    cursor.move_letters(grid, obj->size);
+    show_all();
 
     grid.push_back(obj);
     objects.push_back(obj);
