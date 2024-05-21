@@ -64,14 +64,20 @@ void clear_window(CreateWindow* main_window, ID id) {
     delete draw_thread;
     draw_thread = nullptr;
 
-    //очищаем содержимое окна
+    //смена курсора мышки
+    GdkWindow *gdk_window = gtk_widget_get_window(window);
+    if (gdk_window) {
+        gdk_window_set_cursor(gdk_window, nullptr);
+    }
+
+    //очистка содержмого окна
     GList *children = gtk_container_get_children(GTK_CONTAINER(window));    
     for(GList *it = children; it != NULL; it = g_list_next(it)) {
         gtk_widget_destroy(GTK_WIDGET(it->data));
     }
     g_list_free(children);
 
-    //отключаем обработчики
+    //отключение обработчиков
     for (auto handler : handlers) {
         g_signal_handler_disconnect(window, handler);
     }
@@ -93,9 +99,14 @@ static gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer dat
     if(special_alph.find(key_code) != std::string::npos) {
         flag = true;
     }
-
+    
     if(flag) {
         grid->draw(key_code);
+    }
+
+    if((event->state & GDK_CONTROL_MASK) && (key_code == 's' || key_code == 'S')) {
+        grid->save();
+        return TRUE; 
     }
 
     switch (event->keyval) {

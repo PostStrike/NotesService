@@ -188,3 +188,53 @@ std::pair<int, int> Grid::nearest_cell(int x, int y) {
 
     return {new_x, new_y};
 }
+
+void save_grid_to_file(std::string& filename, Grid* grid) {
+    filename = "../notes/" + filename;
+    std::ofstream file(filename);
+
+    for(const Letter* obj : grid->get_grid()) {
+        file << obj->x << " " << obj->y << " " << obj->sym << "\n";
+    }
+
+    file.close();
+    printf("Data saved to %s\n", filename.c_str());
+}
+
+static void on_save_button_clicked(GtkWidget *button, gpointer data) {
+    const gchar *name = gtk_entry_get_text(GTK_ENTRY(data));
+    std::string filename(name);
+
+    Grid* grid = static_cast<Grid*>(g_object_get_data(G_OBJECT(button), "grid"));
+
+    save_grid_to_file(filename, grid);
+    gtk_widget_destroy(gtk_widget_get_toplevel(button));
+}
+
+void show_input_dialog(Grid* grid) {
+    GtkWidget *dialog, *entry, *button, *box;
+
+    dialog = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(dialog), "Save Grid");
+    gtk_window_set_default_size(GTK_WINDOW(dialog), 300, 100);
+    gtk_container_set_border_width(GTK_CONTAINER(dialog), 10);
+
+    box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+    gtk_container_add(GTK_CONTAINER(dialog), box);
+
+    entry = gtk_entry_new();
+    gtk_box_pack_start(GTK_BOX(box), entry, TRUE, TRUE, 0);
+
+    button = gtk_button_new_with_label("Save");
+    gtk_box_pack_start(GTK_BOX(box), button, TRUE, TRUE, 0);
+
+    g_object_set_data(G_OBJECT(button), "grid", grid);
+
+    g_signal_connect(button, "clicked", G_CALLBACK(on_save_button_clicked), entry);
+
+    gtk_widget_show_all(dialog);
+}
+
+void Grid::save() {
+    show_input_dialog(this);
+}

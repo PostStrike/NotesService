@@ -6,6 +6,7 @@
 #include <thread>
 #include <queue>
 #include <algorithm>
+#include <fstream>
 
 #include <gtk/gtk.h>
 
@@ -32,6 +33,7 @@ public:
     void down_arrow();
     void move_objects_back(int, int, int);
     void show_all();
+    void save();
 
     // Время существования сетки
     int t = 0;
@@ -44,6 +46,10 @@ public:
 
     static std::map<int, std::pair<int, int>> font_rectangles;
     static std::map<std::string, std::pair<int, int>> spaces; 
+
+    std::vector<Letter*> get_grid() {
+        return grid;
+    }
 private:
     GtkWidget* window;
     GtkWidget* box;
