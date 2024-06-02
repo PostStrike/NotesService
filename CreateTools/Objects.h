@@ -235,15 +235,17 @@ public:
 
 		Letter* obj = nullptr;
 		int ind = 0;
+		int pos = 0;
 		for(int i = 0; i < grid.size(); ++i) {
 			if(grid[i]->y != y) continue;
 			int a1 = grid[i]->x;
 			int a2 = grid[i]->x + grid[i]->size;
 			int b1 = left;
 			int b2 = right;
-			if((obj == nullptr || (b2 - a2 < b2 - obj->x - obj->size)) && b2 > a1 && b1 <= a1) {
+			if((obj == nullptr || (b2 - a2 < b2 - obj->x - obj->size)) && b1 < a2 && b2 > a1 && a1 >= pos) {
 				obj = grid[i];
 				ind = i;
+				pos = a1;
 			}
 		}
 
@@ -384,15 +386,17 @@ public:
 
 		Letter* obj = nullptr;
 		int ind = 0;
+		int pos = 0;
 		for(int i = 0; i < grid.size(); ++i) {
 			if(grid[i]->y != y) continue;
 			int a1 = grid[i]->x;
 			int a2 = grid[i]->x + grid[i]->size;
 			int b1 = left;
 			int b2 = right;
-			if((obj == nullptr || (b2 - a2 < b2 - obj->x - obj->size)) && b2 > a1 && b1 <= a1) {
+			if((obj == nullptr || (b2 - a2 < b2 - obj->x - obj->size)) && b1 < a2 && b2 > a1 && a1 >= pos) {
 				obj = grid[i];
 				ind = i;
+				pos = a1;
 			}
 		}
 

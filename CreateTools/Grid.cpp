@@ -38,7 +38,7 @@ Grid::Grid(GtkWidget* window, GtkWidget* box, const int width, const int height,
     this->font_size = font_size;
     this->box = box;
 
-    Object::space = (int)font_rectangles[font_size].first;
+    Object::space = (int)(font_rectangles[font_size].first / 2);
     Object::font_size = font_size;
     Object::window = window;
     Object::box = box;
