@@ -1,10 +1,100 @@
 #pragma once
 
+class Transformer {
+public:
+	virtual void move_forward(std::vector<void*>&, void*&, std::vector<int>) = 0;
+};
+
+template<class T1, class T2>
+class CursorTransformer : public Transformer{
+	void move_forward(std::vector<void*> &void_grid, void*& void_cursor, std::vector<int> additional_inf) {
+		std::vector<T1*>& grid = reinterpret_cast<std::vector<T1*>&>(void_grid);
+		T2& cursor = *static_cast<T2*>(void_cursor);
+
+		int copy_x = cursor.x;
+		int copy_y = cursor.y;
+
+		cursor.x += cursor.space;
+		if(cursor.x >= cursor.font_rectangles[cursor.font_size].first * cursor.num_cols) {
+			cursor.y += cursor.font_rectangles[cursor.font_size].second;
+			cursor.x = 0;
+		}
+
+		int i = copy_y;
+		int copy_size = grid.size();
+		int mx = 0;
+		for(int ind = grid.size() - 1; ind >= 0; ind--) {
+			if(grid[ind]->y != i) continue;
+			if(grid[ind]->x >= copy_x) {
+				grid[ind]->move_forward(grid, grid[ind]->x - copy_x, ind, cursor.x, cursor.y);
+			}
+		}
+	}
+};
+
+template<class T1, class T2>
+class LetterTransformer : public Transformer{
+	void move_forward(std::vector<void*> &void_grid, void*& void_letter, std::vector<int> additional_inf) {
+		std::vector<T1*>& grid = reinterpret_cast<std::vector<T1*>&>(void_grid);
+		T2& letter = *static_cast<T2*>(void_letter);
+
+		int dist = additional_inf[0]; 
+		int ind = additional_inf[1];
+		int cur_x = additional_inf[2];
+		int cur_y = additional_inf[3];
+ 
+		int copy_y = letter.y;
+		int copy_x = letter.x;
+
+		letter.x = cur_x + dist;
+		letter.y = cur_y;
+
+		if(letter.x >= letter.font_rectangles[letter.font_size].first * letter.num_cols || letter.y != copy_y) {
+			letter.x = copy_x;
+			letter.y = copy_y;
+			std::vector<std::pair<T2*, int>> word = letter.get_word(grid, copy_y, letter.size, letter.x);
+			
+			int full_size = 0;
+			for(int i = 0; i < word.size(); ++i) {
+				std::cout << word[i].first->sym;
+				full_size += word[i].first->size;
+			}
+			std::cout << std::endl;
+
+			std::vector<std::pair<int, int>> arr;
+			for(int i = 0; i < grid.size(); ++i) {
+				if(grid[i]->y == copy_y + letter.font_rectangles[letter.font_size].second) {
+					arr.push_back({grid[i]->x, i});
+				}
+			}
+
+			sort(arr.begin(), arr.end());
+			for(int i = arr.size() - 1; i >= 0; --i) {
+				int ind = arr[i].second;
+				if(grid[ind]->y != copy_y + letter.font_rectangles[letter.font_size].second) continue;
+				grid[ind]->move_forward(grid, full_size + letter.space + grid[ind]->x, ind, 0, grid[ind]->y);
+			}
+
+			int new_x = 0;
+			for(int i = 0; i < word.size(); ++i) {
+				T2* temp = word[i].first;
+				int ind = word[i].second;
+
+				temp->x = new_x;
+				temp->y = copy_y + letter.font_rectangles[letter.font_size].second;
+
+				new_x += temp->size;
+			}
+		} 
+	}
+};
+
 class Object {
 public:
 	GtkWidget* container = nullptr;
     GtkWidget* child = nullptr;
-	char sym;
+
+	Transformer* transformer = nullptr;
 
 	int x = 0;
 	int y = 0;
@@ -23,6 +113,25 @@ public:
 class Letter : public Object {
 public:
 	int size = 0;
+	char sym;
+
+	Letter() {
+		this->transformer = new LetterTransformer<Letter, Letter>();
+	}
+
+	~Letter() {
+		delete this->transformer;
+	}
+
+	virtual void move() {
+		gtk_fixed_move(GTK_FIXED(container), child, x, y);
+    	gtk_widget_show(container);
+	}
+
+	void move_forward(std::vector<Letter*> &grid, int dist, int ind, int cur_x, int cur_y) {
+		void* void_this = this;
+		transformer->move_forward(reinterpret_cast<std::vector<void*>&>(grid), void_this, std::vector<int>{dist, ind, cur_x, cur_y});
+	}
 
 	static bool comp(const std::pair<Letter*, int> lhs, const std::pair<Letter*, int> rhs) {
 		return lhs.first->x < rhs.first->x;
@@ -70,84 +179,26 @@ public:
 
 		return res;
 	}
-
-	bool move_forward(std::vector<Letter*> &grid, int dist, int ind, int cur_x, int cur_y) {
-		int copy_y = y;
-		int copy_x = x;
-
-		x = cur_x + dist;
-		y = cur_y;
-
-		if(x >= font_rectangles[font_size].first * num_cols || y != copy_y) {
-			x = copy_x;
-			y = copy_y;
-			std::vector<std::pair<Letter*, int>> word = get_word(grid, copy_y, size, x);
-			
-			int full_size = 0;
-			for(int i = 0; i < word.size(); ++i) {
-				std::cout << word[i].first->sym;
-				full_size += word[i].first->size;
-			}
-			std::cout << std::endl;
-
-			std::vector<std::pair<int, int>> arr;
-			for(int i = 0; i < grid.size(); ++i) {
-				if(grid[i]->y == copy_y + font_rectangles[font_size].second) {
-					arr.push_back({grid[i]->x, i});
-				}
-			}
-
-			sort(arr.begin(), arr.end());
-			for(int i = arr.size() - 1; i >= 0; --i) {
-				int ind = arr[i].second;
-				if(grid[ind]->y != copy_y + font_rectangles[font_size].second) continue;
-				grid[ind]->move_forward(grid, full_size + space + grid[ind]->x, ind, 0, grid[ind]->y);
-			}
-
-			int new_x = 0;
-			for(int i = 0; i < word.size(); ++i) {
-				Letter* temp = word[i].first;
-				int ind = word[i].second;
-
-				temp->x = new_x;
-				temp->y = copy_y + font_rectangles[font_size].second;
-
-				new_x += temp->size;
-			}
-
-			return true;
-		} 
-
-		return false;
-	}
-
-	virtual void move() {
-		gtk_fixed_move(GTK_FIXED(container), child, x, y);
-    	gtk_widget_show(container);
-	}
 };
 
 class Cursor : public Object {
 public:
+	Cursor() {
+		this->transformer = new CursorTransformer<Letter, Cursor>();
+	}
+
+	~Cursor() {
+		delete this->transformer;
+	}
+
+	virtual void move() {
+		gtk_fixed_move(GTK_FIXED(container), child,  x - font_rectangles[font_size].first / 2, y);
+    	gtk_widget_show(container);
+	}
+
 	void move_forward(std::vector<Letter*> &grid) {
-		int copy_x = x;
-		int copy_y = y;
-
-		x += space;
-		if(x >= font_rectangles[font_size].first * num_cols) {
-			y += font_rectangles[font_size].second;
-			x = 0;
-		}
-
-		int i = copy_y;
-		int copy_size = grid.size();
-		int mx = 0;
-		for(int ind = grid.size() - 1; ind >= 0; ind--) {
-			if(grid[ind]->y != i) continue;
-			if(grid[ind]->x >= copy_x) {
-				grid[ind]->move_forward(grid, grid[ind]->x - copy_x, ind, x, y);
-			}
-		}
+		void* void_this = this;
+		transformer->move_forward(reinterpret_cast<std::vector<void*>&>(grid), void_this, std::vector<int>{});
 	}
 
 	void move_letters(std::vector<Letter*> &grid, int dist) {
@@ -176,11 +227,6 @@ public:
 	void enter() {
 		y += font_rectangles[font_size].second;
     	x = 0;
-	}
-
-	virtual void move() {
-		gtk_fixed_move(GTK_FIXED(container), child,  x - font_rectangles[font_size].first / 2, y);
-    	gtk_widget_show(container);
 	}
 
 	void left_arrow(std::vector<Letter*> &grid) {
